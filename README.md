@@ -25,17 +25,14 @@ Ansibleのローカル実行でDocker環境を構築します。
 
 ## 実行コマンド
 
-`REPO_USER` と `REPO_NAME` を環境変数で指定して実行します。
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/REPO_USER/REPO_NAME/master/script/start.sh | REPO_USER=youruser REPO_NAME=yourrepo bash
-```
-
-例:
+最新のリリースタグを使用して実行します。
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/kdinstall/docker-base/master/script/start.sh | REPO_USER=kdinstall REPO_NAME=docker-base bash
 ```
+
+> **注意:** デフォルトでは GitHub の最新リリースタグが自動的に取得・使用されます。  
+> 開発中の最新コードを使いたい場合は、後述のテスト実行コマンドを使用してください。
 
 オプション（`bash -s --` 経由で渡す）:
 
