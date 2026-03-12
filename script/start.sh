@@ -58,29 +58,6 @@ Target OS: Ubuntu 24
 EOF
 }
 
-# Detect the script URL from the curl process sharing bash's stdin pipe
-detect_script_url() {
-    local stdin_inode pid inode cmdline script_url fd_path
-    stdin_inode=$(stat -Lc '%i' /proc/$$/fd/0 2>/dev/null) || return 1
-    for fd_path in /proc/[0-9]*/fd/*; do
-        pid=$(echo "${fd_path}" | cut -d'/' -f3)
-        if [ "${pid}" = "$$" ]; then
-            continue
-        fi
-        inode=$(stat -Lc '%i' "${fd_path}" 2>/dev/null) || continue
-        if [ "${inode}" != "${stdin_inode}" ]; then
-            continue
-        fi
-        cmdline=$(tr '\0' ' ' < "/proc/${pid}/cmdline" 2>/dev/null) || continue
-        script_url=$(echo "${cmdline}" | grep -oE 'https?://[^ ]+' | head -n 1) || continue
-        if [ -n "${script_url}" ]; then
-            echo "${script_url}"
-            return 0
-        fi
-    done
-    return 1
-}
-
 # Parse --help before other checks
 for arg in "$@"; do
     case "$arg" in
@@ -90,6 +67,19 @@ for arg in "$@"; do
             ;;
     esac
 done
+
+# GitHub coordinates — set via env vars:
+#   curl -fsSL URL | REPO_USER=youruser REPO_NAME=yourrepo bash
+if [ -z "${REPO_USER}" ] || [ -z "${REPO_NAME}" ]; then
+    log_error "REPO_USER and REPO_NAME must be set."
+    echo "  curl -fsSL URL | REPO_USER=youruser REPO_NAME=yourrepo bash"
+    exit 1
+fi
+GITHUB_USER="${REPO_USER}"
+GITHUB_REPO="${REPO_NAME}"
+readonly GITHUB_USER GITHUB_REPO
+SCRIPT_URL="https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/master/script/start.sh"
+readonly SCRIPT_URL
 
 # Check os version
 declare DIST_NAME=""
@@ -105,30 +95,6 @@ if [ "${DIST_NAME}" == '' ]; then
     uname -a
     exit 1
 fi
-
-# Detect script URL from curl pipe (required)
-SCRIPT_URL=$(detect_script_url || true)
-if [ -z "${SCRIPT_URL}" ]; then
-    log_error "This script must be run via curl pipe:"
-    echo "  curl -fsSL https://raw.githubusercontent.com/USER/REPO/master/script/start.sh | bash"
-    exit 1
-fi
-
-# Parse GitHub user and repository from URL
-# Expected: https://raw.githubusercontent.com/USER/REPO/...
-GITHUB_HOST=$(echo "${SCRIPT_URL}" | cut -d'/' -f4)
-GITHUB_USER=$(echo "${SCRIPT_URL}" | cut -d'/' -f5)
-GITHUB_REPO=$(echo "${SCRIPT_URL}" | cut -d'/' -f6)
-
-if [ "${GITHUB_HOST}" != "raw.githubusercontent.com" ]; then
-    log_error "Unexpected script URL: ${SCRIPT_URL}"
-    exit 1
-fi
-if [ -z "${GITHUB_USER}" ] || [ -z "${GITHUB_REPO}" ]; then
-    log_error "Could not parse GitHub user/repository from URL: ${SCRIPT_URL}"
-    exit 1
-fi
-readonly GITHUB_USER GITHUB_REPO
 
 # Define fixed parameters
 readonly PLAYBOOK="docker"
