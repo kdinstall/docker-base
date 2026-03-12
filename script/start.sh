@@ -2,16 +2,15 @@
 #
 # Script Name: start.sh
 #
-# Version:      6.1
+# Version:      1.0
 # Author:       Naoki Hirata
-# Date:         2026-02-24
+# Date:         2026-03-13
 # Usage:        start.sh [-test] [--help]
 # Options:      -test      test mode execution with the latest source package
 #               --help     show this help message
 # Description:  This script builds server environment by one-liner command.
 # Version History:
-#               6.1  (2025-02-24) add set -e, log functions, --help, error handling
-#               6.0  (2024-07-03) renewal release limited to Ubuntu
+#               1.0  (2026-03-13) Initial release
 # License:      MIT License
 
 set -e
