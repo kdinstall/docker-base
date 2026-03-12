@@ -16,7 +16,8 @@ Ansibleのローカル実行でDocker環境を構築します。
 
 ## インストールモジュール
 
-- geerlingguy.docker (Ansible Galaxy ロール) で Docker をインストール
+- `geerlingguy.docker` 8.0.0 (Ansible Galaxy ロール) で Docker をインストール
+- `zip`, `unzip` をインストール
 
 # 使い方
 
@@ -25,7 +26,7 @@ Ansibleのローカル実行でDocker環境を構築します。
 ## 実行コマンド
 
 ```
-curl -fsSL https://raw.githubusercontent.com/czbone/oneliner-docker/master/script/start.sh | bash
+curl -fsSL https://raw.githubusercontent.com/kdinstall/docker-base/master/script/start.sh | bash
 ```
 
 オプション（`bash -s --` 経由で渡す）:
